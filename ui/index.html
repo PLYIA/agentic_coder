@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Agentic Coder - by PLYIA</title>
+    <!-- Favicon chargé depuis le dossier assets local -->
+    <link rel="icon" type="image/png" href="assets/AgenticCoder_Icon.png">
+
+    <!-- Frameworks et styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Chargeur officiel de Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+    <style>
+        /* Ajustements pour le terminal et la sélection */
+        #terminal-output {
+            white-space: pre-wrap !important;
+            word-break: break-all;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+        }
+
+        /* Style des onglets (Tabs) */
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 16px;
+            height: 100%;
+            min-width: 140px;
+            max-width: 240px;
+            background: transparent;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+            user-select: none;
+        }
+        .tab:hover { background: rgba(255,255,255,0.03); color: #e2e8f0; }
+        .tab.active { background: rgba(59, 130, 246, 0.05); color: #ffffff; }
+        .tab.dirty .tab-title { color: #f8fafc; }
+        .tab .dirty-dot { color: #f59e0b; text-shadow: 0 0 8px rgba(245, 158, 11, 0.7); }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #3b82f6;
+            box-shadow: 0 0 10px #3b82f6;
+        }
+
+        /* Animation des messages et régénération */
+        .user-message-wrapper { position: relative; padding-bottom: 22px; margin-bottom: 8px; }
+        .retry-btn { opacity: 0; pointer-events: none; transition: all 0.2s; transform: translateY(-5px); }
+        .user-message-wrapper:hover .retry-btn { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+        /* Masquage scrollbar tabs */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* Style des switchs de paramètres */
+        .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #1a1f26; transition: .4s; border-radius: 34px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px;
+            background-color: #4b5563; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: rgba(59, 130, 246, 0.2); border-color: #3b82f6; }
+        input:checked + .slider:before { transform: translateX(16px); background-color: #fff; box-shadow: 0 0 8px #3b82f6; }
+    </style>
+</head>
+<body class="bg-[#05070a] text-[#e2e8f0] h-screen flex flex-col overflow-hidden font-sans text-sm">
+
+    <!-- HEADER / NAVIGATION (Glassmorphism) -->
+    <header class="h-12 bg-[#0d1117]/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4 select-none z-50">
+        <div class="flex items-center gap-6">
+            <!-- Logo PLYIA cliquable -->
+            <a href="https://plyia.github.io/" target="_blank" class="flex items-center gap-3 group">
+                <img src="assets/PLYIA_Icon.png" class="w-8 h-8 rounded-lg shadow-lg border border-white/10 group-hover:scale-105 transition-transform" alt="PLYIA">
+                <div class="flex flex-col">
+                    <span class="text-[11px] font-black tracking-widest text-white leading-none uppercase">Agentic Coder</span>
+                    <span class="text-[8px] font-bold text-blue-400 opacity-60 leading-none mt-1 uppercase">Par PLYIA</span>
+                </div>
+            </a>
+
+            <!-- Menus contextuels -->
+            <div class="flex gap-1 ml-4">
+                <div class="relative group">
+                    <button class="px-3 py-1.5 text-[12px] text-gray-400 hover:text-white rounded-md transition-all bg-transparent border-none outline-none">Fichier</button>
+                    <div class="absolute left-0 top-full hidden group-hover:block w-56 pt-2 z-50">
+                        <div class="bg-[#0d1117]/95 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl py-1 overflow-hidden">
+                            <div onclick="actionNewFile()" class="px-4 py-2 hover:bg-blue-600 text-white cursor-pointer flex justify-between items-center text-[12px]">
+                                <span>Nouveau Fichier</span> <span class="opacity-40 text-[10px]">Ctrl+N</span>
+                            </div>
+                            <div onclick="actionSaveFile()" class="px-4 py-2 hover:bg-blue-600 text-white cursor-pointer flex justify-between items-center text-[12px]">
+                                <span>Sauvegarder</span> <span class="opacity-40 text-[10px]">Ctrl+S</span>
+                            </div>
+                            <div class="h-[1px] bg-white/5 my-1"></div>
+                            <div onclick="actionOpenFolder()" class="px-4 py-2 hover:bg-blue-600 text-white cursor-pointer text-[12px]">Ouvrir Dossier...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative group">
+                    <button class="px-3 py-1.5 text-[12px] text-gray-400 hover:text-white rounded-md transition-all bg-transparent border-none outline-none">Edition</button>
+                    <div class="absolute left-0 top-full hidden group-hover:block w-56 pt-2 z-50">
+                        <div class="bg-[#0d1117]/95 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl py-1 overflow-hidden">
+                            <div onclick="actionUndo()" class="px-4 py-2 hover:bg-blue-600 text-white cursor-pointer flex justify-between items-center text-[12px]">
+                                <span>Annuler</span> <span class="opacity-40 text-[10px]">Ctrl+Z</span>
+                            </div>
+                            <div onclick="actionRedo()" class="px-4 py-2 hover:bg-blue-600 text-white cursor-pointer flex justify-between items-center text-[12px]">
+                                <span>Retablir</span> <span class="opacity-40 text-[10px]">Ctrl+Y</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton d'exécution -->
+        <button id="run-btn" onclick="handleRunClick()" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-400 hover:bg-green-600 hover:text-white text-[11px] font-black transition-all border border-green-500/20 active:scale-95 shadow-lg shadow-green-500/5">
+            <i id="run-icon" data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> <span id="run-text">EXÉCUTER</span>
+        </button>
+    </header>
+
+    <!-- ZONE DE TRAVAIL -->
+    <main class="flex flex-1 overflow-hidden">
+
+        <!-- SIDEBAR GAUCHE (Explorateur) -->
+        <aside class="w-64 bg-[#05070a]/50 border-r border-white/5 flex flex-col">
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-white/5 flex items-center justify-between text-[10px] uppercase font-black text-gray-500">
+                    <span>Projet</span>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="folder-plus" onclick="actionCreateFolder()" class="w-3.5 h-3.5 cursor-pointer hover:text-blue-400 transition-all"></i>
+                        <i data-lucide="file-plus-2" onclick="actionCreateFile()" class="w-3.5 h-3.5 cursor-pointer hover:text-blue-400 transition-all"></i>
+                        <span id="workspace-name" class="text-blue-400 px-2 py-0.5 bg-blue-500/10 rounded-full truncate max-w-[100px]">SANDBOX</span>
+                    </div>
+                </div>
+                <div id="explorer" class="flex-1 overflow-y-auto p-2 space-y-1">
+                    <!-- Fichiers injectés par app.js -->
+                </div>
+            </div>
+
+            <!-- Panneau Dépendances -->
+            <div class="h-40 border-t border-white/5 flex flex-col bg-black/20">
+                <div class="p-2 px-4 border-b border-white/5 flex items-center justify-between text-[9px] font-black text-gray-500 uppercase">
+                    <span>Dépendances</span>
+                    <i data-lucide="refresh-cw" onclick="refreshDeps()" class="w-3 h-3 cursor-pointer hover:text-blue-400"></i>
+                </div>
+                <div id="deps-list" class="flex-1 overflow-y-auto p-2 text-[10px] font-mono text-gray-400 space-y-1"></div>
+            </div>
+        </aside>
+
+        <!-- CENTRE (Éditeur + Terminal) -->
+        <section class="flex-1 flex flex-col bg-[#05070a] min-w-0">
+            <!-- Tabs -->
+            <div id="tabs-container" class="h-10 bg-[#0d1117]/40 flex items-center px-2 gap-1 border-b border-white/5 overflow-x-auto no-scrollbar"></div>
+
+            <!-- Breadcrumbs -->
+            <div id="breadcrumbs" class="h-7 bg-[#0d1117]/20 border-b border-white/5 flex items-center px-4 text-[10px] text-gray-500 gap-2">
+                <i data-lucide="folder" class="w-3 h-3"></i> <span id="breadcrumb-path">sandbox</span>
+            </div>
+
+            <!-- Monaco Container -->
+            <div id="monaco-container" class="flex-1 relative"></div>
+
+            <!-- Terminal intégré -->
+            <div id="terminal-panel" class="h-64 bg-[#05070a] border-t border-white/5 flex flex-col">
+                <div class="h-9 bg-[#0d1117]/60 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4">
+                    <span class="text-[10px] font-black tracking-widest flex items-center gap-2 text-blue-400 uppercase">
+                        <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Terminal <span id="terminal-status" class="ml-2 opacity-30 italic uppercase font-normal">idle</span>
+                    </span>
+                    <i data-lucide="trash-2" onclick="clearTerminal()" class="w-4 h-4 text-gray-600 hover:text-red-400 cursor-pointer"></i>
+                </div>
+                <div id="terminal-output" class="flex-1 overflow-y-auto p-4 text-[12px] font-mono text-gray-300 leading-relaxed"></div>
+                <div id="terminal-input-container" class="h-10 bg-[#0d1117]/80 border-t border-white/5 flex items-center px-4">
+                    <span class="text-blue-500 font-black mr-3">❯</span>
+                    <input type="text" id="terminal-stdin" class="flex-1 bg-transparent border-none outline-none text-[12px] font-mono text-white placeholder:text-gray-800" placeholder="Entrez une commande shell ou répondez au script...">
+                </div>
+            </div>
+        </section>
+
+        <!-- SIDEBAR DROITE (IA) -->
+        <aside class="w-80 bg-[#0d1117]/80 backdrop-blur-xl border-l border-white/10 flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-white/5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div id="led" class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_#ef4444]"></div>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Moteur Local</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="trash-2" onclick="clearChatHistory()" class="w-3.5 h-3.5 text-gray-600 hover:text-white cursor-pointer transition-all"></i>
+                    </div>
+                </div>
+                <!-- Sélecteur de modèle -->
+                <div class="relative">
+                    <select id="model-list" onchange="loadModel()" class="w-full bg-[#05070a] text-[11px] p-2.5 rounded-xl border border-white/10 outline-none hover:border-blue-500 transition-colors cursor-pointer appearance-none shadow-inner pr-8"></select>
+                    <i data-lucide="chevron-down" class="w-3 h-3 absolute right-3 top-1/2 -translate-y-1/2 opacity-30 pointer-events-none"></i>
+                </div>
+                <div id="model-capabilities" class="hidden items-center gap-2 text-[9px] uppercase tracking-wider">
+                    <span class="px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 font-bold">Pensees integrees</span>
+                </div>
+            </div>
+
+            <!-- Chat -->
+            <div id="chat-box" class="flex-1 overflow-y-auto p-5 space-y-6 scroll-smooth"></div>
+
+            <!-- Input Chat -->
+            <div class="p-4 bg-[#0d1117]/60 border-t border-white/5">
+                <div class="relative group">
+                    <textarea id="ai-input" rows="3" disabled class="w-full bg-[#05070a] border border-white/10 rounded-2xl p-4 pr-12 text-xs focus:border-blue-500 outline-none resize-none disabled:opacity-20 placeholder:text-gray-700" placeholder="Décrivez votre modification..."></textarea>
+                    <button id="send-btn" onclick="handleSendClick()" disabled class="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-500 text-white w-8 h-8 rounded-xl shadow-lg flex items-center justify-center transition-all active:scale-90"><i id="send-icon" data-lucide="send" class="w-4 h-4"></i></button>
+                </div>
+                <div class="mt-3 flex items-center justify-between gap-3 text-[10px]">
+                    <label class="flex items-center gap-2 text-gray-400 uppercase tracking-wider">
+                        <span>Auto-Correction</span>
+                        <span class="switch">
+                            <input type="checkbox" id="setting-auto-fix">
+                            <span class="slider"></span>
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-2 text-gray-400 uppercase tracking-wider">
+                        <span>Mode Agentic</span>
+                        <span class="switch">
+                            <input type="checkbox" id="setting-agentic-mode">
+                            <span class="slider"></span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- BARRE DE STATUT (FOOTER) -->
+    <footer class="h-6 bg-[#007acc] text-white flex items-center justify-between px-3 text-[10px] font-medium z-50">
+        <div class="flex items-center gap-4">
+            <!-- Detection de langage s'affichera ici -->
+            <span class="flex items-center gap-1"><i data-lucide="code-2" class="w-3 h-3"></i> <span id="status-lang" class="font-black uppercase tracking-widest">Initialisation...</span></span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1 cursor-pointer hover:bg-white/20 px-2 rounded transition" onclick="refreshEnvironmentStatus()">
+                <i data-lucide="box" class="w-3 h-3"></i>
+                <span id="status-venv">Python</span>
+            </span>
+            <span class="opacity-80 uppercase font-black tracking-tighter">Agentic Coder v2.1</span>
+        </div>
+    </footer>
+
+    <div id="explorer-context-menu" class="hidden fixed z-[200] min-w-[140px] bg-[#0d1117] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
+        <button id="explorer-rename-btn" class="w-full text-left px-3 py-2 text-[11px] text-gray-200 hover:bg-white/10">Renommer</button>
+        <button id="explorer-delete-btn" class="w-full text-left px-3 py-2 text-[11px] text-red-400 hover:bg-red-500/10">Supprimer</button>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

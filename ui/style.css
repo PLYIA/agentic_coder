@@ -1,0 +1,332 @@
+/**
+ * Agentic Coder Pro - Theme Design
+ * Style: Modern Dark Glassmorphism
+ * Version: 2.0
+ */
+
+/* --- 1. IMPORTATION DES POLICES --- */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&family=Inter:wght@300;400;600;800&display=swap');
+
+/* --- 2. RÉGLAGES DE BASE --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #05070a; /* Fond ultra sombre */
+    color: #e2e8f0;
+    overflow: hidden;
+}
+
+/* --- 3. SCROLLBARS PERSONNALISÉES --- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.4); /* Accent bleu au survol */
+}
+
+/* Masquer la scrollbar pour les onglets */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* --- 4. HEADER & NAVIGATION --- */
+header {
+    z-index: 100;
+}
+
+/* Effet au survol du logo */
+header img {
+    transition: transform 0.3s ease;
+}
+
+/* --- 5. SYSTÈME D'ONGLETS (TABS) --- */
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 100%;
+    min-width: 140px;
+    max-width: 240px;
+    background: transparent;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 600;
+    user-select: none;
+}
+
+.tab:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: #e2e8f0;
+}
+
+.tab.active {
+    background: rgba(59, 130, 246, 0.05);
+    color: #ffffff;
+}
+
+/* Ligne d'accentuation sous l'onglet actif */
+.tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #3b82f6;
+    box-shadow: 0 0 12px #3b82f6;
+}
+
+.tab .close-tab {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.tab:hover .close-tab {
+    opacity: 0.5;
+}
+
+.tab .close-tab:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ef4444;
+}
+
+/* --- 6. TERMINAL & CONSOLE --- */
+#terminal-panel {
+z-index: 10;
+box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+}
+
+#terminal-output {
+white-space: pre-wrap !important;
+word-break: break-all;
+font-family: 'Fira Code', monospace;
+line-height: 1.5;
+user-select: text;
+-webkit-user-select: text;
+}
+
+#terminal-stdin::placeholder {
+color: #1e293b;
+font-style: italic;
+}
+
+/* --- 7. CHAT IA & ARTIFACTS --- */
+
+/* Bulles utilisateur */
+.chat-msg-wrapper.text-right .bg-blue-600 {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+}
+
+/* Blocs de code (Artifacts) générés par l'IA */
+details {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 12px 0;
+    transition: all 0.3s ease;
+}
+
+details:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+summary {
+    padding: 10px 14px;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-transform: uppercase;
+}
+
+summary::-webkit-details-marker {
+    display: none;
+}
+
+.code-content {
+    padding: 15px;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: #7dd3fc;
+    background: #05070a;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    line-height: 1.6;
+    overflow-x: auto;
+}
+
+/* --- 8. DESIGN DU TOGGLE (PREMIUM iOS DARK) --- */
+
+.toggle-bg {
+    width: 32px;
+    height: 18px;
+    background-color: #1a1f26;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.toggle-dot {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 12px;
+    height: 12px;
+    background-color: #4b5563;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Changement de style quand coché */
+#auto-file-toggle:checked ~ .toggle-bg,
+#setting-auto-file:checked ~ .slider,
+#setting-auto-fix:checked ~ .slider {
+background-color: rgba(59, 130, 246, 0.2);
+border-color: #3b82f6;
+}
+
+#auto-file-toggle:checked ~ .toggle-dot {
+transform: translateX(14px);
+background-color: #ffffff;
+box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+}
+
+/* --- 9. MODALE DE PARAMÈTRES --- */
+#modal-settings {
+z-index: 1000;
+}
+
+/* Style des switchs dans la modale */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #1a1f26;
+    transition: .4s;
+    border-radius: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: #4b5563;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: rgba(59, 130, 246, 0.3);
+    border-color: #3b82f6;
+}
+
+input:checked + .slider:before {
+    transform: translateX(18px);
+    background-color: white;
+    box-shadow: 0 0 8px #3b82f6;
+}
+
+/* --- 10. ANIMATIONS IA --- */
+
+/* Pulsation de la LED */
+@keyframes pulse-led {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.animate-pulse-led {
+    animation: pulse-led 2s infinite ease-in-out;
+}
+
+/* Entrée des bulles de chat */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-msg-wrapper {
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Autorise explicitement la sélection/copie dans le chat */
+#chat-box,
+#chat-box .chat-msg-wrapper,
+#chat-box .chat-msg-wrapper * {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* --- 11. MONACO EDITOR CUSTOMS --- */
+.monaco-editor .scroll-decoration {
+    box-shadow: none !important;
+}
+
+.monaco-editor .margin {
+    background-color: transparent !important;
+}
+
+/* --- 12. FOOTER / BARRE D'ÉTAT --- */
+footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: #007acc; /* Couleur VS Code par défaut */
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+}
+
+footer span {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    transition: background 0.2s;
+}
+
+#status-venv:hover {
+background: rgba(255, 255, 255, 0.1);
+}

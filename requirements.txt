@@ -1,0 +1,7 @@
+pywebview
+llama-cpp-python
+python-dotenv
+pydantic
+PyQt5
+PyQtWebEngine
+qtpy
