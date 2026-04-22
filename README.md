@@ -1,4 +1,4 @@
-# 🤖 Agentic Coder Pro (by PLYIA)
+# 🤖 Agentic Coder (by PLYIA)
 
 **Agentic Coder** est le premier environnement de développement (IDE) agentique entièrement local, privé et open source. Conçu par **PLYIA**, cet outil permet de concevoir, coder et exécuter vos projets Python et HTML avec la puissance des derniers modèles de langage (LLM) sans aucun passage par le cloud.
 
